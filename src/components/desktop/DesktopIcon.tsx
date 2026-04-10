@@ -69,7 +69,7 @@ export const DesktopIcon: React.FC<DesktopIconProps> = ({
       if (draggedId && draggedId !== item.id) {
         const store = useDesktopStore.getState();
         const pos = store.findFreePosition(item.id);
-        store.moveItem(draggedId, item.id, pos.gridX, pos.gridY);
+        void store.moveItem(draggedId, item.id, pos.gridX, pos.gridY);
       }
     }
   };

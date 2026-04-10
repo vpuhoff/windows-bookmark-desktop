@@ -85,9 +85,15 @@ const StartMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     : [];
 
   const wallpapers = [
-    { name: 'По умолчанию', path: '/images/wallpaper-default.jpg' },
-    { name: 'Закат', path: '/images/wallpaper-sunset.jpg' },
-    { name: 'Природа', path: '/images/wallpaper-nature.jpg' },
+    { name: 'По умолчанию', path: '/placeholder.svg' },
+    {
+      name: 'Закат',
+      path: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80',
+    },
+    {
+      name: 'Природа',
+      path: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80',
+    },
   ];
 
   return (
@@ -158,7 +164,7 @@ const StartMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 {wallpapers.map(wp => (
                   <button
                     key={wp.path}
-                    onClick={() => setWallpaper(wp.path)}
+                    onClick={() => void setWallpaper(wp.path)}
                     className={`w-14 h-9 rounded-md overflow-hidden border-2 transition-colors ${
                       settings.wallpaper === wp.path ? 'border-win-accent' : 'border-transparent'
                     }`}
@@ -172,7 +178,7 @@ const StartMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               <div className="text-xs text-muted-foreground mb-2">Размер значков</div>
               <div className="flex gap-1">
                 {(['small', 'medium', 'large'] as const).map(s => (
-                  <button key={s} onClick={() => setIconSize(s)}
+                  <button key={s} onClick={() => void setIconSize(s)}
                     className={`px-3 py-1 rounded-md text-xs transition-colors ${
                       settings.iconSize === s ? 'bg-win-accent text-primary-foreground' : 'hover:bg-win-context-hover'
                     }`}

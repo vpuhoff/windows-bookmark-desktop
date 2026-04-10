@@ -13,8 +13,10 @@ const cellSizeMap: Record<IconSize, number> = { small: 70, medium: 90, large: 11
 
 export const Desktop: React.FC = () => {
   const {
+    ready,
     settings, getChildren, windows, selectedIds, setSelectedIds, clearSelection,
-    addFolder, removeItem, setIconSize, setSortMode, setWallpaper,
+    addFolder, removeItem, setIconSize, setSortMode, setWallpaper, refreshFromChrome,
+    relayoutIconsBySort,
   } = useDesktopStore();
 
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; items: ContextMenuItem[] } | null>(null);
@@ -32,9 +34,15 @@ export const Desktop: React.FC = () => {
     clearSelection();
 
     const wallpapers = [
-      { name: 'По умолчанию', path: '/images/wallpaper-default.jpg' },
-      { name: 'Закат', path: '/images/wallpaper-sunset.jpg' },
-      { name: 'Природа', path: '/images/wallpaper-nature.jpg' },
+      { name: 'По умолчанию', path: '/placeholder.svg' },
+      {
+        name: 'Закат',
+        path: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80',
+      },
+      {
+        name: 'Природа',
+        path: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80',
+      },
     ];
 
     setContextMenu({
@@ -43,25 +51,30 @@ export const Desktop: React.FC = () => {
         {
           label: 'Вид', icon: <LayoutGrid size={14} />,
           submenu: [
-            { label: 'Мелкие значки', onClick: () => setIconSize('small') },
-            { label: 'Обычные значки', onClick: () => setIconSize('medium') },
-            { label: 'Крупные значки', onClick: () => setIconSize('large') },
+            { label: 'Мелкие значки', onClick: () => void setIconSize('small') },
+            { label: 'Обычные значки', onClick: () => void setIconSize('medium') },
+            { label: 'Крупные значки', onClick: () => void setIconSize('large') },
           ]
         },
         {
           label: 'Сортировка', icon: <SortAsc size={14} />,
           submenu: [
-            { label: 'По имени', onClick: () => setSortMode('name') },
-            { label: 'По дате', onClick: () => setSortMode('date') },
+            { label: 'По имени', onClick: () => void setSortMode('name') },
+            { label: 'По дате', onClick: () => void setSortMode('date') },
+            { separator: true, label: '' },
+            {
+              label: 'Выровнять по сетке',
+              onClick: () => void relayoutIconsBySort(),
+            },
           ]
         },
-        { label: 'Обновить', icon: <RefreshCw size={14} />, onClick: () => window.location.reload() },
+        { label: 'Обновить', icon: <RefreshCw size={14} />, onClick: () => void refreshFromChrome() },
         { separator: true, label: '' },
         {
           label: 'Создать', icon: <FolderPlus size={14} />,
           submenu: [
             { label: 'Ярлык', icon: <Link size={14} />, onClick: () => setCreateDialog(true) },
-            { label: 'Папку', icon: <FolderPlus size={14} />, onClick: () => addFolder('Новая папка', null) },
+            { label: 'Папку', icon: <FolderPlus size={14} />, onClick: () => void addFolder('Новая папка', null) },
           ]
         },
         { separator: true, label: '' },
@@ -69,12 +82,12 @@ export const Desktop: React.FC = () => {
           label: 'Персонализация', icon: <Image size={14} />,
           submenu: wallpapers.map(wp => ({
             label: wp.name,
-            onClick: () => setWallpaper(wp.path),
+            onClick: () => void setWallpaper(wp.path),
           }))
         },
       ],
     });
-  }, [clearSelection, setIconSize, setSortMode, addFolder, setWallpaper]);
+  }, [clearSelection, setIconSize, setSortMode, addFolder, setWallpaper, refreshFromChrome, relayoutIconsBySort]);
 
   const handleIconContext = useCallback((e: React.MouseEvent, item: BookmarkItem) => {
     e.preventDefault();
@@ -86,16 +99,16 @@ export const Desktop: React.FC = () => {
           { label: 'Открыть', onClick: () => item.url && window.open(item.url, '_blank') },
           { label: 'Копировать ссылку', onClick: () => item.url && navigator.clipboard.writeText(item.url) },
           { separator: true, label: '' },
-          { label: 'Переименовать', onClick: () => { const n = prompt('Новое имя:', item.name); if (n) useDesktopStore.getState().renameItem(item.id, n); } },
-          { label: 'Удалить', onClick: () => { if (confirm(`Удалить "${item.name}"?`)) removeItem(item.id); } },
+          { label: 'Переименовать', onClick: () => { const n = prompt('Новое имя:', item.name); if (n) void useDesktopStore.getState().renameItem(item.id, n); } },
+          { label: 'Удалить', onClick: () => { if (confirm(`Удалить "${item.name}"?`)) void removeItem(item.id); } },
           { separator: true, label: '' },
           { label: 'Свойства', onClick: () => setPropsItem(item) },
         ]
       : [
           { label: 'Открыть', onClick: () => useDesktopStore.getState().openFolder(item.id, item.name) },
           { separator: true, label: '' },
-          { label: 'Переименовать', onClick: () => { const n = prompt('Новое имя:', item.name); if (n) useDesktopStore.getState().renameItem(item.id, n); } },
-          { label: 'Удалить', onClick: () => { if (confirm(`Удалить папку "${item.name}" и все её содержимое?`)) removeItem(item.id); } },
+          { label: 'Переименовать', onClick: () => { const n = prompt('Новое имя:', item.name); if (n) void useDesktopStore.getState().renameItem(item.id, n); } },
+          { label: 'Удалить', onClick: () => { if (confirm(`Удалить папку "${item.name}" и все её содержимое?`)) void removeItem(item.id); } },
         ];
     setContextMenu({ x: e.clientX, y: e.clientY, items: menuItems });
   }, [setSelectedIds, removeItem]);
@@ -113,7 +126,7 @@ export const Desktop: React.FC = () => {
     const rect = desktopRef.current.getBoundingClientRect();
     const gridX = Math.floor((e.clientX - rect.left) / cellSize);
     const gridY = Math.floor((e.clientY - rect.top) / cellSize);
-    useDesktopStore.getState().moveItem(draggedId, null, gridX, gridY);
+    void useDesktopStore.getState().moveItem(draggedId, null, gridX, gridY);
   };
 
   // Selection rectangle
@@ -159,13 +172,21 @@ export const Desktop: React.FC = () => {
   React.useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Delete' && selectedIds.length > 0) {
-        selectedIds.forEach(id => removeItem(id));
+        selectedIds.forEach((id) => void removeItem(id));
         clearSelection();
       }
     };
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, [selectedIds, removeItem, clearSelection]);
+
+  if (!ready) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-background text-muted-foreground font-segoe">
+        Загрузка закладок…
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 overflow-hidden font-segoe">

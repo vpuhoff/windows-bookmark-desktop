@@ -12,12 +12,12 @@ export const CreateBookmarkDialog: React.FC<Props> = ({ parentId, onClose }) => 
   const [name, setName] = useState('');
   const { addBookmark } = useDesktopStore();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!url) return;
     const finalUrl = url.startsWith('http') ? url : `https://${url}`;
     const finalName = name || (() => { try { return new URL(finalUrl).hostname; } catch { return url; } })();
-    addBookmark(finalName, finalUrl, parentId);
+    await addBookmark(finalName, finalUrl, parentId);
     onClose();
   };
 

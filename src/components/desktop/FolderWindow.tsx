@@ -70,15 +70,15 @@ export const FolderWindowComponent: React.FC<Props> = ({ window: win }) => {
           { label: 'Открыть', onClick: () => item.url && window.open(item.url, '_blank') },
           { label: 'Копировать ссылку', onClick: () => item.url && navigator.clipboard.writeText(item.url) },
           { separator: true, label: '' },
-          { label: 'Переименовать', onClick: () => { const n = prompt('Новое имя:', item.name); if (n) useDesktopStore.getState().renameItem(item.id, n); } },
-          { label: 'Удалить', onClick: () => removeItem(item.id) },
+          { label: 'Переименовать', onClick: () => { const n = prompt('Новое имя:', item.name); if (n) void useDesktopStore.getState().renameItem(item.id, n); } },
+          { label: 'Удалить', onClick: () => void removeItem(item.id) },
           { separator: true, label: '' },
           { label: 'Свойства', onClick: () => setPropsItem(item) },
         ]
       : [
           { label: 'Открыть', onClick: () => navigateInto(item.id, item.name) },
-          { label: 'Переименовать', onClick: () => { const n = prompt('Новое имя:', item.name); if (n) useDesktopStore.getState().renameItem(item.id, n); } },
-          { label: 'Удалить', onClick: () => removeItem(item.id) },
+          { label: 'Переименовать', onClick: () => { const n = prompt('Новое имя:', item.name); if (n) void useDesktopStore.getState().renameItem(item.id, n); } },
+          { label: 'Удалить', onClick: () => void removeItem(item.id) },
         ];
     setContextMenu({ x: e.clientX, y: e.clientY, items: menuItems });
   };
@@ -89,7 +89,7 @@ export const FolderWindowComponent: React.FC<Props> = ({ window: win }) => {
       x: e.clientX, y: e.clientY,
       items: [
         { label: 'Создать ярлык', onClick: () => setCreateDialog(true) },
-        { label: 'Создать папку', onClick: () => addFolder('Новая папка', currentFolderId) },
+        { label: 'Создать папку', onClick: () => void addFolder('Новая папка', currentFolderId) },
       ]
     });
   };

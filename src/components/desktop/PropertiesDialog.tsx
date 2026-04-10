@@ -13,17 +13,14 @@ export const PropertiesDialog: React.FC<Props> = ({ item, onClose }) => {
   const [url, setUrl] = useState(item.url || '');
   const { updateItem } = useDesktopStore();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const updates: Partial<BookmarkItem> = { name };
     if (item.type === 'bookmark') {
       const finalUrl = url.startsWith('http') ? url : `https://${url}`;
       updates.url = finalUrl;
-      try {
-        updates.favicon = `https://www.google.com/s2/favicons?domain=${new URL(finalUrl).hostname}&sz=64`;
-      } catch {}
     }
-    updateItem(item.id, updates);
+    await updateItem(item.id, updates);
     onClose();
   };
 
