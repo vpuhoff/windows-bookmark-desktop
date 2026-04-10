@@ -8,6 +8,7 @@ import { PropertiesDialog } from './PropertiesDialog';
 import { FolderWindowComponent } from './FolderWindow';
 import { Taskbar } from './Taskbar';
 import { Monitor, FolderPlus, Link, SortAsc, LayoutGrid, RefreshCw, Image } from 'lucide-react';
+import { getBookmarkDragIds, setBookmarkDragData } from '@/lib/dragBookmarks';
 
 const cellSizeMap: Record<IconSize, number> = { small: 70, medium: 90, large: 110 };
 
@@ -25,6 +26,8 @@ export const Desktop: React.FC = () => {
   const [selectionRect, setSelectionRect] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
   const desktopRef = useRef<HTMLDivElement>(null);
   const selectionStartRef = useRef<{ x: number; y: number } | null>(null);
+  /** После рамочного выделения приходит click по столу — не сбрасывать выделение. */
+  const suppressDesktopClickClearRef = useRef(false);
 
   const desktopItems = getChildren(null);
   const cellSize = cellSizeMap[settings.iconSize];
@@ -114,19 +117,29 @@ export const Desktop: React.FC = () => {
   }, [setSelectedIds, removeItem]);
 
   const handleDragStart = (e: React.DragEvent, item: BookmarkItem) => {
-    e.dataTransfer.setData('text/plain', item.id);
-    e.dataTransfer.effectAllowed = 'move';
+    setBookmarkDragData(e, item, selectedIds);
   };
 
   const handleDesktopDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const draggedId = e.dataTransfer.getData('text/plain');
-    if (!draggedId || !desktopRef.current) return;
+    const ids = getBookmarkDragIds(e).filter(Boolean);
+    if (ids.length === 0 || !desktopRef.current) return;
 
     const rect = desktopRef.current.getBoundingClientRect();
     const gridX = Math.floor((e.clientX - rect.left) / cellSize);
     const gridY = Math.floor((e.clientY - rect.top) / cellSize);
-    void useDesktopStore.getState().moveItem(draggedId, null, gridX, gridY);
+    const store = useDesktopStore.getState();
+    void (async () => {
+      for (let i = 0; i < ids.length; i++) {
+        const id = ids[i];
+        if (i === 0) {
+          await store.moveItem(id, null, gridX, gridY);
+        } else {
+          const pos = store.findFreePosition(null);
+          await store.moveItem(id, null, pos.gridX, pos.gridY);
+        }
+      }
+    })();
   };
 
   // Selection rectangle
@@ -134,11 +147,15 @@ export const Desktop: React.FC = () => {
     if (e.button !== 0 || e.target !== desktopRef.current) return;
     clearSelection();
     selectionStartRef.current = { x: e.clientX, y: e.clientY };
+    let didBoxDrag = false;
 
     const handleMove = (ev: MouseEvent) => {
       if (!selectionStartRef.current) return;
       const sx = selectionStartRef.current.x;
       const sy = selectionStartRef.current.y;
+      if (Math.abs(ev.clientX - sx) > 2 || Math.abs(ev.clientY - sy) > 2) {
+        didBoxDrag = true;
+      }
       const x = Math.min(sx, ev.clientX);
       const y = Math.min(sy, ev.clientY);
       const w = Math.abs(ev.clientX - sx);
@@ -158,6 +175,9 @@ export const Desktop: React.FC = () => {
     };
 
     const handleUp = () => {
+      if (didBoxDrag) {
+        suppressDesktopClickClearRef.current = true;
+      }
       selectionStartRef.current = null;
       setSelectionRect(null);
       document.removeEventListener('mousemove', handleMove);
@@ -202,7 +222,14 @@ export const Desktop: React.FC = () => {
         className="absolute inset-0 bottom-12"
         onContextMenu={handleDesktopContext}
         onMouseDown={handleMouseDown}
-        onClick={(e) => { if (e.target === desktopRef.current) clearSelection(); }}
+        onClick={(e) => {
+          if (e.target !== desktopRef.current) return;
+          if (suppressDesktopClickClearRef.current) {
+            suppressDesktopClickClearRef.current = false;
+            return;
+          }
+          clearSelection();
+        }}
         onDragOver={e => e.preventDefault()}
         onDrop={handleDesktopDrop}
       >

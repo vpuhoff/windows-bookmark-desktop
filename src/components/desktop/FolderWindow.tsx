@@ -6,6 +6,7 @@ import { ContextMenu, ContextMenuItem } from './ContextMenu';
 import { CreateBookmarkDialog } from './CreateBookmarkDialog';
 import { PropertiesDialog } from './PropertiesDialog';
 import { X, Minus, Square, ChevronLeft, Folder } from 'lucide-react';
+import { setBookmarkDragData } from '@/lib/dragBookmarks';
 
 interface Props {
   window: FolderWindowType;
@@ -95,7 +96,7 @@ export const FolderWindowComponent: React.FC<Props> = ({ window: win }) => {
   };
 
   const handleDragStart = (e: React.DragEvent, item: BookmarkItem) => {
-    e.dataTransfer.setData('text/plain', item.id);
+    setBookmarkDragData(e, item, selectedIds);
   };
 
   if (win.isMinimized) return null;

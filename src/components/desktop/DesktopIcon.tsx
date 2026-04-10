@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { BookmarkItem, IconSize } from '@/types/bookmark';
 import { useDesktopStore } from '@/store/useDesktopStore';
+import { getBookmarkDragIds } from '@/lib/dragBookmarks';
 import { Folder } from 'lucide-react';
 
 const sizeMap: Record<IconSize, { icon: number; cell: number; fontSize: string }> = {
@@ -63,15 +64,18 @@ export const DesktopIcon: React.FC<DesktopIconProps> = ({
   };
 
   const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
     e.currentTarget.classList.remove('ring-2', 'ring-win-accent');
-    if (item.type === 'folder') {
-      const draggedId = e.dataTransfer.getData('text/plain');
-      if (draggedId && draggedId !== item.id) {
-        const store = useDesktopStore.getState();
+    if (item.type !== 'folder') return;
+    const ids = getBookmarkDragIds(e).filter((id) => id && id !== item.id);
+    if (ids.length === 0) return;
+    const store = useDesktopStore.getState();
+    void (async () => {
+      for (const draggedId of ids) {
         const pos = store.findFreePosition(item.id);
-        void store.moveItem(draggedId, item.id, pos.gridX, pos.gridY);
+        await store.moveItem(draggedId, item.id, pos.gridX, pos.gridY);
       }
-    }
+    })();
   };
 
   const renderIcon = () => {
