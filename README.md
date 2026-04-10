@@ -56,6 +56,22 @@ npm run pack:ext
 
 Повторно упаковать уже собранный `dist` без пересборки: `npm run zip:ext`.
 
+### GitHub Actions (CI и релизы)
+
+| Workflow | Когда | Что делает |
+|----------|--------|------------|
+| [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | Push и PR в `main` | `npm ci`, тесты, `build:ext`, артефакт с содержимым `dist/` |
+| [`.github/workflows/release.yml`](.github/workflows/release.yml) | Push тега `v*` (например `v0.2.0`) или вручную | `pack:ext`, ZIP в артефактах; при **теге** — публикация `release/*.zip` в [GitHub Releases](https://docs.github.com/repositories/releasing-projects-on-github/about-releases) |
+
+Выпуск версии (имя тега и версия в `public/manifest.json` лучше согласовать):
+
+```bash
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+Ручной запуск **Release** без тега собирает ZIP и кладёт его только в артефакты workflow (без создания Release).
+
 ### Установка в браузере
 
 1. Откройте `chrome://extensions`.
