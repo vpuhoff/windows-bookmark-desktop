@@ -8,11 +8,12 @@ export default {
     container: {
       center: true,
       padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
+      screens: { "2xl": "1400px" },
     },
     extend: {
+      fontFamily: {
+        segoe: ['"Segoe UI"', 'Inter', 'system-ui', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -47,6 +48,24 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        win: {
+          taskbar: "hsl(var(--win-taskbar))",
+          "taskbar-fg": "hsl(var(--win-taskbar-foreground))",
+          surface: "hsl(var(--win-surface))",
+          "surface-fg": "hsl(var(--win-surface-foreground))",
+          mica: "hsl(var(--win-mica))",
+          acrylic: "hsl(var(--win-acrylic))",
+          accent: "hsl(var(--win-accent))",
+          "accent-hover": "hsl(var(--win-accent-hover))",
+          selection: "hsl(var(--win-selection))",
+          "icon-text": "hsl(var(--win-icon-text))",
+          context: "hsl(var(--win-context-bg))",
+          "context-border": "hsl(var(--win-context-border))",
+          "context-hover": "hsl(var(--win-context-hover))",
+          titlebar: "hsl(var(--win-titlebar))",
+          "titlebar-fg": "hsl(var(--win-titlebar-foreground))",
+          "close-hover": "hsl(var(--win-close-hover))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -64,26 +83,18 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
-        "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
-        },
-        "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
-        },
+        "accordion-down": { from: { height: "0" }, to: { height: "var(--radix-accordion-content-height)" } },
+        "accordion-up": { from: { height: "var(--radix-accordion-content-height)" }, to: { height: "0" } },
+        "win-open": { from: { opacity: "0", transform: "scale(0.95)" }, to: { opacity: "1", transform: "scale(1)" } },
+        "win-close": { from: { opacity: "1", transform: "scale(1)" }, to: { opacity: "0", transform: "scale(0.95)" } },
+        "fade-in": { from: { opacity: "0" }, to: { opacity: "1" } },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "win-open": "win-open 0.2s ease-out",
+        "win-close": "win-close 0.15s ease-in",
+        "fade-in": "fade-in 0.15s ease-out",
       },
     },
   },
