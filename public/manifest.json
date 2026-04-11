@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "WinDesk Bookmarks",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Менеджер закладок в стиле рабочего стола для новой вкладки",
   "chrome_url_overrides": {
     "newtab": "index.html"
