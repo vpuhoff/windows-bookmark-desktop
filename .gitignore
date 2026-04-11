@@ -9,6 +9,10 @@ lerna-debug.log*
 
 node_modules
 
+# Локальный npm cache / tmp (обход ограничений окружения при npm ci)
+.npm-cache-ci/
+.tmp/
+
 # Сборка Vite и упаковка расширения (не коммитить артефакты)
 /dist
 /dist-ssr
